@@ -3345,23 +3345,25 @@ img.u-pull-left {
 .gallery-grid {
     display : grid;
     grid-template-columns : repeat(auto-fit, minmax(280px, 1fr));
-    gap : var(--vspace-1);
+    gap : var(--vspace-1_25);
     margin-top : var(--vspace-2);
 }
 
 .gallery-item {
     position : relative;
     overflow : hidden;
-    border-radius : 8px;
-    aspect-ratio : 1;
-    background : var(--color-gray-9);
+    border-radius : 12px;
+    aspect-ratio : 16 / 9;
+    min-height : 240px;
+    background : linear-gradient(145deg, rgba(255, 215, 0, 0.08), rgba(255, 215, 0, 0.02));
+    border : 1px solid rgba(255, 215, 0, 0.14);
     cursor : pointer;
     transition : all 0.4s cubic-bezier(0.215, 0.61, 0.355, 1);
 }
 
 .gallery-item.reel-item {
-    aspect-ratio : auto;
-    overflow : visible;
+    aspect-ratio : 16 / 9;
+    overflow : hidden;
 }
 
 .gallery-item.reel-item blockquote {
@@ -3382,11 +3384,11 @@ img.u-pull-left {
 .video-thumbnail {
     position : relative;
     width : 100%;
-    height : 100%;
-    padding-bottom : 100%;
-    background : var(--color-gray-9);
+    height : 0;
+    padding-bottom : 56.25%;
+    background : radial-gradient(circle at 20% 20%, rgba(255, 215, 0, 0.18), rgba(0, 0, 0, 0.85));
     overflow : hidden;
-    border-radius : 8px;
+    border-radius : 12px;
 }
 
 .video-thumbnail img {
@@ -3489,7 +3491,7 @@ img.u-pull-left {
 
 #lightboxImage {
     max-width : 100%;
-    max-height : 60vh;
+    max-height : 55vh;
     object-fit : contain;
     border-radius : 8px;
     box-shadow : 0 20px 60px rgba(255, 215, 0, 0.3);
@@ -3503,8 +3505,8 @@ img.u-pull-left {
 }
 
 .lightbox-details {
-    margin-top : 30px;
-    padding : 20px;
+    margin-top : 16px;
+    padding : 16px 20px;
     background : rgba(255, 215, 0, 0.05);
     border : 1px solid rgba(255, 215, 0, 0.2);
     border-radius : 8px;
@@ -3644,7 +3646,7 @@ img.u-pull-left {
 /* Responsive Lightbox */
 @media (max-width: 800px) {
     .lightbox-content {
-        padding : 20px;
+        padding : 16px;
     }
 
     .lightbox-image-container {
@@ -3652,7 +3654,7 @@ img.u-pull-left {
     }
 
     #lightboxImage {
-        max-height : 50vh;
+        max-height : 45vh;
     }
 
     .lightbox-close {
@@ -3677,14 +3679,27 @@ img.u-pull-left {
         right : 10px;
     }
 
+    .lightbox-thumbnails {
+        padding : 12px 10px;
+    }
+
+    .thumbnails-scroll {
+        flex-wrap : nowrap;
+        justify-content : flex-start;
+        overflow-x : auto;
+        gap : 10px;
+        padding-bottom : 6px;
+    }
+
     .thumbnail {
         width : 60px;
         height : 60px;
+        flex : 0 0 auto;
     }
 
     .lightbox-details {
-        margin-top : 20px;
-        padding : 15px;
+        margin-top : 12px;
+        padding : 14px 16px;
     }
 
     .lightbox-description {
@@ -3700,8 +3715,8 @@ img.u-pull-left {
 }
 
 .gallery-item:hover {
-    transform : scale(1.05);
-    box-shadow : 0 10px 40px rgba(234, 190, 124, 0.3);
+    transform : translateY(-6px) scale(1.02);
+    box-shadow : 0 18px 50px rgba(234, 190, 124, 0.32);
 }
 
 .gallery-item img {
@@ -3721,13 +3736,13 @@ img.u-pull-left {
     left : 0;
     right : 0;
     bottom : 0;
-    background : linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, transparent 50%);
+    background : linear-gradient(180deg, rgba(0, 0, 0, 0) 35%, rgba(0, 0, 0, 0.82) 100%);
     opacity : 0;
     transition : opacity 0.4s ease;
     display : flex;
     flex-direction : column;
     justify-content : flex-end;
-    padding : var(--vspace-1);
+    padding : var(--vspace-1_25);
     z-index : 2;
 }
 
@@ -3832,26 +3847,28 @@ img.u-pull-left {
 .occasions-grid,
 .projects-grid {
     display : grid;
-    grid-template-columns : repeat(auto-fit, minmax(280px, 1fr));
-    gap : var(--vspace-2_5);
-    margin-top : var(--vspace-3);
+    grid-template-columns : repeat(auto-fit, minmax(260px, 1fr));
+    gap : var(--vspace-2);
+    margin-top : var(--vspace-2_5);
+    align-items : stretch;
 }
 
 /* Event Cards - Premium Glass Morphism */
 .occasion-card {
     position : relative;
     overflow : hidden;
-    border-radius : 16px;
-    min-height : 420px;
+    border-radius : 18px;
+    min-height : 380px;
     background-size : cover;
     background-position : center;
-    background-attachment : fixed;
+    background-attachment : scroll;
     border : 1px solid rgba(255, 255, 255, 0.2);
     transition : all 0.5s cubic-bezier(0.23, 1, 0.320, 1);
     display : flex;
     flex-direction : column;
     justify-content : flex-end;
-    box-shadow : 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+    box-shadow : 0 14px 40px rgba(0, 0, 0, 0.28);
+    isolation : isolate;
 }
 
 .occasion-overlay {
@@ -3860,21 +3877,22 @@ img.u-pull-left {
     left : 0;
     width : 100%;
     height : 100%;
-    background : linear-gradient(135deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.6) 50%, rgba(0, 0, 0, 0.8) 100%);
+    background : linear-gradient(180deg, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0.7) 65%, rgba(0, 0, 0, 0.9) 100%);
     z-index : 1;
     transition : all 0.5s ease;
+    backdrop-filter : blur(2px);
 }
 
 .occasion-content {
     position : relative;
     z-index : 2;
-    padding : var(--vspace-2_5);
+    padding : var(--vspace-2);
     background : rgba(255, 255, 255, 0.08);
     backdrop-filter : blur(20px);
     -webkit-backdrop-filter : blur(20px);
     border-top : 1px solid rgba(255, 255, 255, 0.2);
-    border-radius : 12px;
-    margin : var(--vspace-1_5);
+    border-radius : 14px;
+    margin : var(--vspace-1_25);
 }
 
 .occasion-icon {
@@ -3883,11 +3901,11 @@ img.u-pull-left {
     justify-content : center;
     width : 50px;
     height : 50px;
-    background : rgba(255, 255, 255, 0.15);
-    border-radius : 12px;
-    font-size : 24px;
-    color : rgba(255, 255, 255, 0.9);
-    margin-bottom : var(--vspace-1);
+    background : rgba(255, 255, 255, 0.12);
+    border-radius : 14px;
+    font-size : 22px;
+    color : rgba(255, 255, 255, 0.95);
+    margin-bottom : var(--vspace-0_75);
     backdrop-filter : blur(10px);
     transition : all 0.4s ease;
 }
@@ -3904,19 +3922,19 @@ img.u-pull-left {
 
 .occasion-title {
     font-family : var(--font-1);
-    font-size : var(--text-lg);
+    font-size : calc(var(--text-lg) * 0.95);
     font-weight : 700;
     margin : 0;
-    margin-bottom : var(--vspace-0_75);
+    margin-bottom : var(--vspace-0_5);
     color : rgba(255, 255, 255, 0.95);
     text-shadow : 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .occasion-description {
     font-size : var(--text-sm);
-    line-height : 1.6;
+    line-height : 1.65;
     color : rgba(255, 255, 255, 0.8);
-    margin-bottom : var(--vspace-1);
+    margin-bottom : var(--vspace-0_75);
 }
 
 .occasion-tag {
@@ -3936,24 +3954,24 @@ img.u-pull-left {
 
 /* Hover Effects */
 .occasion-card:hover {
-    transform : translateY(-12px) scale(1.02);
-    box-shadow : 0 25px 60px rgba(0, 0, 0, 0.35);
-    border-color : rgba(255, 255, 255, 0.4);
+    transform : translateY(-10px) scale(1.015);
+    box-shadow : 0 26px 70px rgba(0, 0, 0, 0.4);
+    border-color : rgba(255, 215, 0, 0.35);
 }
 
 .occasion-card:hover .occasion-overlay {
-    background : linear-gradient(135deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.5) 50%, rgba(0, 0, 0, 0.7) 100%);
+    background : linear-gradient(180deg, rgba(0, 0, 0, 0.05) 0%, rgba(0, 0, 0, 0.55) 60%, rgba(0, 0, 0, 0.85) 100%);
 }
 
 .occasion-card:hover .occasion-icon {
-    background : rgba(255, 255, 255, 0.25);
-    transform : scale(1.1) rotate(-5deg);
+    background : rgba(255, 215, 0, 0.2);
+    transform : translateY(-3px) scale(1.05);
     color : rgba(255, 255, 255, 1);
 }
 
 .occasion-card:hover .occasion-content {
     background : rgba(255, 255, 255, 0.12);
-    border-color : rgba(255, 255, 255, 0.35);
+    border-color : rgba(255, 215, 0, 0.35);
 }
 
 /* Individual Card Accent Colors */
@@ -3979,11 +3997,7 @@ img.u-pull-left {
     }
 
     .occasion-card {
-        min-height : 380px;
-    }
-
-    .occasion-content {
-        padding : var(--vspace-2);
+        min-height : 340px;
     }
 
     .occasion-title {
@@ -3997,12 +4011,12 @@ img.u-pull-left {
 
 @media (max-width: 768px) {
     .occasions-grid {
-        grid-template-columns : repeat(auto-fit, minmax(200px, 1fr));
+        grid-template-columns : repeat(auto-fit, minmax(220px, 1fr));
         gap : var(--vspace-1_5);
     }
 
     .occasion-card {
-        min-height : 340px;
+        min-height : 320px;
     }
 
     .occasion-content {
@@ -4034,7 +4048,7 @@ img.u-pull-left {
 @media (max-width: 480px) {
     .occasions-grid {
         grid-template-columns : 1fr;
-        gap : var(--vspace-1_5);
+        gap : var(--vspace-1_25);
     }
 
     .occasion-card {
@@ -5251,7 +5265,7 @@ img.u-pull-left {
 .testimonials-track {
     display : flex;
     gap : var(--vspace-1_5);
-    animation : scroll-left 40s linear infinite;
+    animation : scroll-left 38s linear infinite;
     width : max-content;
 }
 
@@ -5273,11 +5287,13 @@ img.u-pull-left {
     flex-shrink : 0;
     width : 360px;
     height : 500px;
-    border-radius : 12px;
+    border-radius : 18px;
     overflow : hidden;
     position : relative;
     cursor : pointer;
-    transition : all 0.4s cubic-bezier(0.215, 0.61, 0.355, 1);
+    transition : all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    border : 1px solid rgba(255, 215, 0, 0.25);
+    box-shadow : 0 25px 60px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.03);
 }
 
 .card-image-wrapper {
@@ -5306,7 +5322,8 @@ img.u-pull-left {
     left : 0;
     width : 100%;
     height : 100%;
-    background : linear-gradient(135deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.3) 100%);
+    background : radial-gradient(circle at 20% 20%, rgba(255, 215, 0, 0.25), rgba(0, 0, 0, 0.75));
+    mix-blend-mode : overlay;
 }
 
 .card-content {
@@ -5314,19 +5331,121 @@ img.u-pull-left {
     bottom : 0;
     left : 0;
     right : 0;
-    padding : 30px;
+    padding : 28px 28px 26px;
     color : white;
     z-index : 2;
-    backdrop-filter : blur(10px);
+    backdrop-filter : blur(12px);
     display : flex;
     flex-direction : column;
     justify-content : flex-end;
     height : 100%;
+    background : linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.75) 70%);
 }
 
 /* Unique Card Styles */
-.card-style-1 .card-content {
-    background : linear-gradient(180deg, transparent 0%, rgba(255, 215, 0, 0.2) 100%);\n    border-left : 4px solid var(--color-1);\n}\n\n.card-style-1 .testimonial-text {\n    color : rgba(255, 255, 255, 0.95);\n}\n\n.card-style-2 .card-content {\n    background : linear-gradient(180deg, transparent 0%, rgba(100, 150, 255, 0.2) 100%);\n    border-left : 4px solid #6496ff;\n}\n\n.card-style-2 .testimonial-text {\n    color : rgba(255, 255, 255, 0.95);\n}\n\n.card-style-3 .card-content {\n    background : linear-gradient(180deg, transparent 0%, rgba(255, 100, 150, 0.2) 100%);\n    border-left : 4px solid #ff6496;\n}\n\n.card-style-3 .testimonial-text {\n    color : rgba(255, 255, 255, 0.95);\n}\n\n.card-style-4 .card-content {\n    background : linear-gradient(180deg, transparent 0%, rgba(100, 255, 150, 0.2) 100%);\n    border-left : 4px solid #64ff96;\n}\n\n.card-style-4 .testimonial-text {\n    color : rgba(255, 255, 255, 0.95);\n}\n\n.card-style-5 .card-content {\n    background : linear-gradient(180deg, transparent 0%, rgba(200, 100, 255, 0.2) 100%);\n    border-left : 4px solid #c864ff;\n}\n\n.card-style-5 .testimonial-text {\n    color : rgba(255, 255, 255, 0.95);\n}\n\n.testimonial-text {\n    font-size : 15px;\n    line-height : 1.6;\n    margin-bottom : 20px;\n    flex-grow : 1;\n    font-weight : 300;\n}\n\n.testimonial-author {\n    border-top : 1px solid rgba(255, 255, 255, 0.2);\n    padding-top : 15px;\n}\n\n.testimonial-author h4 {\n    margin : 0;\n    font-size : 16px;\n    font-weight : 600;\n    color : white;\n    margin-bottom : 2px;\n}\n\n.testimonial-author span {\n    font-size : 12px;\n    color : rgba(255, 255, 255, 0.7);\n    font-weight : 300;\n}\n\n.testimonial-card:hover {\n    transform : translateY(-10px);\n    box-shadow : 0 20px 50px rgba(0, 0, 0, 0.3);\n}\n\n/* Responsive */\n@media (max-width: 1024px) {\n    .testimonial-card {\n        width : 300px;\n        height : 420px;\n    }\n\n    .card-content {\n        padding : 25px;\n    }\n\n    .testimonial-text {\n        font-size : 14px;\n        margin-bottom : 15px;\n    }\n}\n\n@media (max-width: 768px) {\n    .testimonial-card {\n        width : 280px;\n        height : 380px;\n    }\n\n    .card-content {\n        padding : 20px;\n    }\n\n    .testimonial-text {\n        font-size : 13px;\n    }\n}
+.card-style-1 .card-content { border-left : 4px solid var(--color-1); }
+.card-style-2 .card-content { border-left : 4px solid #7db3ff; }
+.card-style-3 .card-content { border-left : 4px solid #ff92c4; }
+.card-style-4 .card-content { border-left : 4px solid #79ffb6; }
+.card-style-5 .card-content { border-left : 4px solid #d6a0ff; }
+
+.testimonial-badge {
+    display : inline-flex;
+    align-items : center;
+    gap : 8px;
+    background : rgba(255, 215, 0, 0.12);
+    color : var(--color-1);
+    border : 1px solid rgba(255, 215, 0, 0.35);
+    padding : 8px 12px;
+    border-radius : 999px;
+    font-size : 11px;
+    letter-spacing : 0.08em;
+    text-transform : uppercase;
+    margin-bottom : 14px;
+}
+
+.testimonial-stars {
+    color : #ffd166;
+    font-size : 13px;
+    letter-spacing : 1px;
+    margin-bottom : 18px;
+}
+
+.testimonial-text {
+    font-size : 16px;
+    line-height : 1.7;
+    margin-bottom : 24px;
+    flex-grow : 1;
+    font-weight : 400;
+    color : rgba(255, 255, 255, 0.95);
+}
+
+.testimonial-author {
+    border-top : 1px solid rgba(255, 255, 255, 0.18);
+    padding-top : 16px;
+    display : flex;
+    flex-direction : column;
+    gap : 3px;
+}
+
+.testimonial-author h4 {
+    margin : 0;
+    font-size : 17px;
+    font-weight : 600;
+    color : white;
+}
+
+.testimonial-author span {
+    font-size : 12px;
+    color : rgba(255, 255, 255, 0.72);
+    font-weight : 300;
+}
+
+.testimonial-card::after {
+    content : "";
+    position : absolute;
+    inset : 12px;
+    border-radius : 14px;
+    border : 1px solid rgba(255, 255, 255, 0.06);
+    pointer-events : none;
+}
+
+.testimonial-card:hover {
+    transform : translateY(-12px);
+    box-shadow : 0 28px 80px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 215, 0, 0.25);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .testimonial-card {
+        width : 300px;
+        height : 440px;
+    }
+
+    .card-content {
+        padding : 24px;
+    }
+
+    .testimonial-text {
+        font-size : 15px;
+        margin-bottom : 18px;
+    }
+}
+
+@media (max-width: 768px) {
+    .testimonial-card {
+        width : 280px;
+        height : 400px;
+    }
+
+    .card-content {
+        padding : 20px;
+    }
+
+    .testimonial-text {
+        font-size : 14px;
+    }
+}
 
 /* ------------------------------------------------------------------- 
  * responsive:
