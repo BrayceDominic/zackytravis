@@ -950,8 +950,8 @@
 
             <div class="row">
                 <div class="column ss-copyright">
-                    <span>© Copyright Zacky Travis 2025</span> 
-                    <span>Design by <a href="https://www.styleshout.com/">StyleShout</a> Distribution By <a href="https://themewagon.com">Themewagon</a></span>
+                    <span>© Copyright Zacky Travis <span id="year"></span></span>
+                    <span>Developed by <a href="https://github.com/BrayceDominic/">Brayce Dominic</a></span>
                 </div>
 
                 <div class="ss-go-top">
@@ -970,6 +970,9 @@
     ================================================== -->
     <script src="js/plugins.js"></script>
     <script src="js/main.js"></script>
+                        <script>
+document.getElementById("year").textContent = new Date().getFullYear();
+</script>
 
     <!-- Theme Toggle Script -->
     <script>
