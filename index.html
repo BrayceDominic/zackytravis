@@ -18,6 +18,11 @@
     <link rel="stylesheet" href="css/vendor.css">
     <link rel="stylesheet" href="css/styles.css">
     
+    <!-- Leaflet CSS for Maps -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet-markercluster/1.5.0/MarkerCluster.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet-markercluster/1.5.0/MarkerCluster.Default.min.css">
+
     <!-- Font Awesome Icons
     ================================================== -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -29,6 +34,258 @@
     <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
     <link rel="manifest" href="site.webmanifest">
 
+    <style>
+        /* Minimal typewriter preloader override */
+        #preloader {
+            position: fixed;
+            inset: 0;
+            display: grid;
+            place-items: center;
+            background: #0b0f17;
+            z-index: 2000;
+            transition: opacity 320ms ease, visibility 320ms ease;
+        }
+        #preloader.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        #preloader .type-shell {
+            font-family: var(--font-1, "Gill Sans", "Gill Sans MT", sans-serif);
+            font-size: clamp(1.8rem, 4vw, 2.6rem);
+            letter-spacing: 0.14em;
+            color: var(--color-1, #eabe7c);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 1rem 1.4rem;
+            border-radius: 14px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 12px 36px rgba(0,0,0,0.35);
+        }
+        #preloader .cursor {
+            width: 2px;
+            height: 1.4em;
+            background: var(--color-1, #eabe7c);
+            animation: blink 0.9s steps(1) infinite;
+        }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        /* Preloader pop animation */
+        #typeText span {
+            display: inline-block;
+            opacity: 0;
+            transform: scale(0.6);
+            animation: pop-in 260ms ease forwards;
+        }
+        @keyframes pop-in {
+            0% { opacity: 0; transform: translateY(10px) scale(0.6); }
+            70% { opacity: 1; transform: translateY(-2px) scale(1.08); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* Crime-scene tape frame */
+        .tape-frame {
+            position: relative;
+            overflow: hidden;
+            isolation: isolate;
+        }
+        .tape-edge {
+            position: absolute;
+            background: repeating-linear-gradient(135deg, #f5c542 0 16px, #111 16px 32px);
+            color: #f5c542;
+            mix-blend-mode: difference;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            text-align: center;
+            padding: 0.35rem 0.5rem;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+            white-space: nowrap;
+            pointer-events: none;
+        }
+        .tape-top,
+        .tape-bottom { left: -10%; right: -10%; }
+        .tape-top { top: -4%; transform: rotate(-4deg); }
+        .tape-bottom { bottom: -4%; transform: rotate(4deg); }
+        .tape-left,
+        .tape-right {
+            top: -10%; bottom: -10%;
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+        }
+        .tape-left { left: -5%; transform: rotate(4deg); }
+        .tape-right { right: -5%; transform: rotate(-4deg); }
+
+        /* Experience / Education cards */
+        .xp-grid {
+            display: grid;
+            gap: 1rem;
+        }
+        .xp-card {
+            position: relative;
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 1rem;
+            padding: 1.25rem 1.35rem;
+            background: var(--card);
+            border-radius: 16px;
+            border: var(--glass-border);
+            box-shadow: var(--shadow-soft);
+            overflow: hidden;
+        }
+        .xp-card::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(120deg, rgba(35,150,127,0.08), rgba(234,190,124,0.08));
+            opacity: 0.6;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .xp-timeline {
+            position: relative;
+            display: grid;
+            place-items: start;
+            z-index: 1;
+        }
+        .xp-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--color-2), var(--color-1));
+            box-shadow: 0 0 0 6px rgba(255,255,255,0.05);
+        }
+        .xp-line {
+            display: block;
+            width: 2px;
+            height: 100%;
+            margin: 0 auto;
+            background: linear-gradient(180deg, var(--color-2), transparent);
+            opacity: 0.5;
+        }
+        .xp-body { position: relative; z-index: 1; }
+        .xp-tag {
+            display: inline-flex;
+            padding: 0.3rem 0.8rem;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.08);
+            border: var(--glass-border);
+            color: var(--muted);
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 0.4rem;
+        }
+        .xp-role { margin: 0; color: var(--muted); font-weight: 600; }
+        .xp-copy { margin: 0.35rem 0 0.65rem; color: var(--text); }
+        .xp-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .xp-meta span {
+            padding: 0.35rem 0.7rem;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
+            font-size: 0.9rem;
+            color: var(--text);
+        }
+        @media (max-width: 768px) {
+            .xp-card { grid-template-columns: 1fr; }
+            .xp-line { display: none; }
+        }
+
+        /* Threads fallback icon */
+        .icon-threads {
+            display: inline-flex;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #000;
+            color: #f5c542;
+            font-weight: 800;
+            font-size: 11px;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .icon-threads::before {
+            content: "T";
+            mix-blend-mode: difference;
+        }
+        [data-theme="light"] .icon-threads {
+            background: #f5c542;
+            color: #000;
+        }
+
+        /* Contact redesign */
+        .contact-wrap {
+            background: var(--card);
+            border-radius: 20px;
+            border: var(--glass-border);
+            box-shadow: var(--shadow-soft);
+            padding: clamp(1.5rem, 2vw, 2.2rem);
+            display: grid;
+            gap: 1.5rem;
+            backdrop-filter: blur(12px);
+        }
+        .contact-hero {
+            display: grid;
+            grid-template-columns: 1.4fr 0.8fr;
+            gap: 1.2rem;
+            align-items: stretch;
+        }
+        .contact-cta {
+            background: linear-gradient(135deg, rgba(35,150,127,0.28), rgba(234,190,124,0.22));
+            border: var(--glass-border);
+            border-radius: 16px;
+            padding: 1rem 1.2rem;
+            box-shadow: var(--shadow-soft);
+        }
+        .cta-kicker { letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 0; }
+        .contact-sub { color: var(--muted); max-width: 48ch; }
+        .contact-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 0.8rem; }
+        .contact-cta h3 { margin: 0.25rem 0 0.75rem; }
+        .contact-cta ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.35rem; }
+        .contact-cta li { display: flex; gap: 0.5rem; align-items: center; color: var(--text); }
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+        }
+        .contact-card {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 0.75rem;
+            align-items: center;
+            background: var(--card-light);
+            border: var(--glass-border);
+            border-radius: 14px;
+            padding: 0.95rem 1.1rem;
+            box-shadow: var(--shadow-soft);
+        }
+        .card-icon {
+            width: 42px; height: 42px;
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(135deg, var(--color-2), var(--color-1));
+            color: #0b0f17;
+            font-size: 1rem;
+        }
+        .card-label { margin: 0; color: var(--muted); font-weight: 600; }
+        .card-link { margin: 0; color: var(--text); font-weight: 700; text-decoration: none; }
+        .social-card .contact-social { margin: 0; }
+        .social-card li { margin-right: 0.4rem; }
+        @media (max-width: 960px) {
+            .contact-hero { grid-template-columns: 1fr; }
+        }
+    </style>
+
 </head>
 
 <body id="top">
@@ -37,10 +294,9 @@
     <!-- # preloader
     ================================================== -->
     <div id="preloader">
-        <div class="loader-content">
-            <div class="loader-circle"></div>
-            <div class="loader-bar"></div>
-            <p class="loader-text">Loading</p>
+        <div class="type-shell">
+            <span class="cursor" aria-hidden="true"></span>
+            <span id="typeText" aria-label="Zacky Travis"></span>
         </div>
     </div>
 
@@ -69,20 +325,20 @@
 
             <!-- Theme Toggle Button -->
             <button class="theme-toggle dark" id="themeToggle" aria-label="Toggle dark/light mode">
-                <span class="theme-toggle__icon" title="Light mode">☀️</span>
-                <span class="theme-toggle__icon" title="Dark mode">🌙</span>
+                <i class="fas fa-sun theme-toggle__icon" title="Light mode"></i>
+                <i class="fas fa-moon theme-toggle__icon" title="Dark mode"></i>
             </button>
 
             <div class="row wide main-nav-wrap">
                 <nav class="column lg-12 main-nav">
                     <ul>
-                        <li><a href="index.html" class="home-link">Zacky.</a></li>
-                        <li class="current"><a href="#intro" class="smoothscroll">Intro</a></li>
-                        <li><a href="#about" class="smoothscroll">About</a></li>
-                        <li><a href="#gallery" class="smoothscroll">Gallery</a></li>
-                        <li><a href="#occasions" class="smoothscroll">Events</a></li>
-                        <li><a href="#projects" class="smoothscroll">Projects</a></li>
-                        <li><a href="#contact" class="smoothscroll">Contact</a></li>
+                        <li><a href="index.html" class="home-link"><i class="fas fa-play-circle"></i> Zacky.</a></li>
+                        <li class="current"><a href="#intro" class="smoothscroll"><i class="fas fa-bolt"></i> Intro</a></li>
+                        <li><a href="#about" class="smoothscroll"><i class="fas fa-user"></i> About</a></li>
+                        <li><a href="#gallery" class="smoothscroll"><i class="fas fa-images"></i> Gallery</a></li>
+                        <li><a href="#occasions" class="smoothscroll"><i class="fas fa-calendar-alt"></i> Events</a></li>
+                        <li><a href="#projects" class="smoothscroll"><i class="fas fa-briefcase"></i> Projects</a></li>
+                        <li><a href="#contact" class="smoothscroll"><i class="fas fa-envelope"></i> Contact</a></li>
                     </ul>
                 </nav>
             </div>
@@ -138,9 +394,13 @@
 
                 <div class="row about-info wide" data-animate-block>
 
-                    <div class="column lg-6 md-12 about-info__pic-block">
+                    <div class="column lg-6 md-12 about-info__pic-block tape-frame">
                         <img src="images/flowers.jpg" 
                              srcset="images/flowers.jpg 1x, images/flowers.jpg 2x" alt="" class="about-info__pic" data-animate-el>
+                        <div class="tape-edge tape-top">ZACKY TRAVIS ▸ DO NOT CROSS ▸ ZACKY TRAVIS ▸ DO NOT CROSS ▸ </div>
+                        <div class="tape-edge tape-bottom">ZACKY TRAVIS ▸ DO NOT CROSS ▸ ZACKY TRAVIS ▸ DO NOT CROSS ▸ </div>
+                        <div class="tape-edge tape-left">ZACKY TRAVIS ▸ DO NOT CROSS ▸ ZACKY TRAVIS ▸ DO NOT CROSS ▸ </div>
+                        <div class="tape-edge tape-right">ZACKY TRAVIS ▸ DO NOT CROSS ▸ ZACKY TRAVIS ▸ DO NOT CROSS ▸ </div>
                     </div>
 
                     <div class="column lg-6 md-12">
@@ -179,77 +439,86 @@
                 <div class="row about-timelines" data-animate-block>
 
                     <div class="column lg-6 tab-12">
-
-                        <h2 class="text-pretitle" data-animate-el>
-                            Experience
-                        </h2>
-
-                        <div class="timeline" data-animate-el>
-
-                            <div class="timeline__block">
-                                <div class="timeline__bullet"></div>
-                                <div class="timeline__header">
-                                    <h4 class="timeline__title">Travis Creative Studios</h4>
-                                    <h5 class="timeline__meta">Director & Founder</h5>
-                                    <p class="timeline__timeframe">January 2019 - Present</p>
+                        <h2 class="text-pretitle" data-animate-el>Experience</h2>
+                        <div class="xp-grid" data-animate-el>
+                            <article class="xp-card">
+                                <div class="xp-timeline">
+                                    <span class="xp-dot"></span>
+                                    <span class="xp-line"></span>
                                 </div>
-                                <div class="timeline__desc">
-                                    <p>Founded my own creative studio specializing in high-end video production, visual effects, and graphic design. Directed over 40 commercial spots, music videos, and cinematic content for major brands and independent artists. Leading a talented team of cinematographers, editors, and motion designers.</p>
+                                <div class="xp-body">
+                                    <p class="xp-tag">2019 — Present</p>
+                                    <h4>Travis Creative Studios</h4>
+                                    <p class="xp-role">Director & Founder</p>
+                                    <p class="xp-copy">Founded a studio delivering high-end video, VFX, and design. Directed 40+ commercial spots, music videos, and cinematic campaigns with a multi-disciplinary team.</p>
+                                    <div class="xp-meta">
+                                        <span>40+ productions</span>
+                                        <span>Global brands</span>
+                                        <span>Lead 8-person crew</span>
+                                    </div>
                                 </div>
-                            </div>
-    
-                            <div class="timeline__block">
-                                <div class="timeline__bullet"></div>
-                                <div class="timeline__header">
-                                    <h4 class="timeline__title">Apex Media Group</h4>
-                                    <h5 class="timeline__meta">Senior Video Director</h5>
-                                    <p class="timeline__timeframe">June 2015 - December 2018</p>
-                                </div>
-                                <div class="timeline__desc">
-                                    <p>Directed and produced broadcast content, commercials, and digital marketing campaigns for Fortune 500 companies. Managed production teams, developed creative concepts, and oversaw post-production workflow. Achieved multiple awards for cinematic excellence and creative innovation.</p>
-                                </div>
-                            </div>
-    
-                        </div> <!-- end timeline -->
+                            </article>
 
-                    </div> <!-- end column -->
+                            <article class="xp-card">
+                                <div class="xp-timeline">
+                                    <span class="xp-dot"></span>
+                                    <span class="xp-line"></span>
+                                </div>
+                                <div class="xp-body">
+                                    <p class="xp-tag">2015 — 2018</p>
+                                    <h4>Apex Media Group</h4>
+                                    <p class="xp-role">Senior Video Director</p>
+                                    <p class="xp-copy">Directed broadcast and digital campaigns, led creative concepts, and supervised post-production workflows earning awards for cinematic craft.</p>
+                                    <div class="xp-meta">
+                                        <span>Fortune 500</span>
+                                        <span>Awards x5</span>
+                                        <span>Multi-city shoots</span>
+                                    </div>
+                                </div>
+                            </article>
+                        </div>
+                    </div>
 
                     <div class="column lg-6 tab-12">
-
-                        <h2 class="text-pretitle" data-animate-el>
-                            Education
-                        </h2>
-
-                        <div class="timeline" data-animate-el>
-
-                            <div class="timeline__block">
-                                <div class="timeline__bullet"></div>
-                                <div class="timeline__header">
-                                    <h4 class="timeline__title">University of Southern California</h4>
-                                    <h5 class="timeline__meta">MFA in Cinematic Arts</h5>
-                                    <p class="timeline__timeframe">May 2015</p>
+                        <h2 class="text-pretitle" data-animate-el>Education</h2>
+                        <div class="xp-grid" data-animate-el>
+                            <article class="xp-card">
+                                <div class="xp-timeline">
+                                    <span class="xp-dot"></span>
+                                    <span class="xp-line"></span>
                                 </div>
-                                <div class="timeline__desc">
-                                    <p>Focused on directing, cinematography, and post-production techniques. Produced award-winning short films and documentaries. Gained expertise in visual storytelling and advanced filmmaking technology.</p>
+                                <div class="xp-body">
+                                    <p class="xp-tag">2013 — 2015</p>
+                                    <h4>University of Southern California</h4>
+                                    <p class="xp-role">MFA · Cinematic Arts</p>
+                                    <p class="xp-copy">Specialized in directing, cinematography, and post-production; produced award-winning shorts and documentaries.</p>
+                                    <div class="xp-meta">
+                                        <span>Festival wins</span>
+                                        <span>Advanced color</span>
+                                        <span>Directing labs</span>
+                                    </div>
                                 </div>
-                            </div>
-    
-                            <div class="timeline__block">
-                                <div class="timeline__bullet"></div>
-                                <div class="timeline__header">
-                                    <h4 class="timeline__title">California State University</h4>
-                                    <h5 class="timeline__meta">B.A. in Film & Media Studies</h5>
-                                    <p class="timeline__timeframe">May 2013</p>
-                                </div>
-                                <div class="timeline__desc">
-                                    <p>Graduated with honors. Focused on film history, production, and media theory. Completed several documentary and narrative projects that gained recognition at student film festivals.</p>
-                                </div>
-                            </div>
-    
-                        </div> <!-- end timeline -->
-                        
-                    </div> <!-- end column -->
+                            </article>
 
+                            <article class="xp-card">
+                                <div class="xp-timeline">
+                                    <span class="xp-dot"></span>
+                                    <span class="xp-line"></span>
+                                </div>
+                                <div class="xp-body">
+                                    <p class="xp-tag">2009 — 2013</p>
+                                    <h4>California State University</h4>
+                                    <p class="xp-role">B.A. · Film & Media</p>
+                                    <p class="xp-copy">Focused on film history, production, and media theory; completed narrative and doc projects recognized at student festivals.</p>
+                                    <div class="xp-meta">
+                                        <span>Honors</span>
+                                        <span>Docu focus</span>
+                                        <span>Festival shorts</span>
+                                    </div>
+                                </div>
+                            </article>
+                        </div>
+                    </div>
 
                 </div> <!-- end about-timelines -->
 
@@ -837,107 +1106,484 @@
             </section> <!-- end s-occasions -->
 
 
-            <!-- ### projects completed
+            <!-- ### projects completed - Story UI
             ================================================== -->
-            <section id="projects" class="s-projects target-section">
 
-                <div class="row">
-                    <div class="column lg-12" data-animate-block>
-                        <h2 class="text-pretitle" data-animate-el>
-                            Portfolio
-                        </h2>
-                        <p class="h1" data-animate-el>
-                            Projects Completed
-                        </p>
+            <style>
+                :root {
+                    --card: rgba(15, 17, 22, 0.8);
+                    --card-light: rgba(18, 21, 28, 0.9);
+                    --accent: var(--color-2-light);
+                    --accent-2: var(--color-1);
+                    --text: #ecf0f6;
+                    --muted: #9aa6b8;
+                    --glass-border: 1px solid rgba(255, 255, 255, 0.12);
+                    --shadow-soft: 0 20px 60px rgba(10, 15, 30, 0.32);
+                    --shadow-strong: 0 22px 80px rgba(0, 0, 0, 0.45);
+                }
+                [data-theme="light"] {
+                    --card: rgba(255, 255, 255, 0.92);
+                    --card-light: rgba(255, 255, 255, 0.98);
+                    --text: #0f172a;
+                    --muted: #4b5563;
+                    --glass-border: 1px solid rgba(0, 0, 0, 0.05);
+                }
+                .projects-stories {
+                    position: relative;
+                    overflow: hidden;
+                }
+                .projects-stories::before {
+                    content: "";
+                    position: absolute;
+                    inset: 0;
+                    background: radial-gradient(circle at 18% 22%, rgba(35,150,127,0.18), transparent 36%),
+                                radial-gradient(circle at 82% 12%, rgba(234,190,124,0.16), transparent 32%),
+                                linear-gradient(135deg, rgba(12,16,22,0.94), rgba(12,16,22,0.78));
+                    z-index: 0;
+                }
+                .projects-stories .section-inner {
+                    position: relative;
+                    z-index: 1;
+                }
+                .projects-headline {
+                    display: flex;
+                    align-items: center;
+                    gap: 1rem;
+                    background: var(--card);
+                    border-radius: 18px;
+                    padding: 1.4rem 1.6rem;
+                    border: var(--glass-border);
+                    box-shadow: var(--shadow-soft);
+                    backdrop-filter: blur(16px);
+                }
+                .projects-headline .dot {
+                    width: 12px;
+                    height: 12px;
+                    border-radius: 50%;
+                    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+                    box-shadow: 0 0 0 8px rgba(124,93,255,0.16);
+                }
+                .projects-carousel {
+                    margin-top: 2rem;
+                    display: grid;
+                    grid-template-columns: 56px 1fr 56px;
+                    align-items: center;
+                    gap: 1rem;
+                    background: var(--card);
+                    border-radius: 18px;
+                    border: var(--glass-border);
+                    box-shadow: var(--shadow-soft);
+                    padding: 0.75rem 1rem;
+                    backdrop-filter: blur(12px);
+                }
+                .story-track {
+                    display: flex;
+                    gap: 1rem;
+                    overflow-x: auto;
+                    padding: 1.1rem 0.35rem 1.35rem;
+                    scroll-snap-type: x mandatory;
+                    align-items: flex-start;
+                    min-height: 180px;
+                    justify-content: center;
+                    flex-wrap: wrap;
+                }
+                .story-track::-webkit-scrollbar { height: 6px; }
+                .story-track::-webkit-scrollbar-thumb {
+                    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+                    border-radius: 999px;
+                }
+                .story-bubble {
+                    width: 120px;
+                    height: 120px;
+                    position: relative;
+                    border-radius: 50%;
+                    padding: 3px;
+                    background: linear-gradient(135deg, var(--color-2-lighter), var(--color-1));
+                    box-shadow: 0 12px 30px rgba(0,0,0,0.28), 0 0 0 6px rgba(255,255,255,0.05);
+                    cursor: pointer;
+                    transition: transform 260ms ease, box-shadow 260ms ease, filter 260ms ease;
+                    scroll-snap-align: center;
+                }
+                .story-bubble:hover {
+                    transform: translateY(-6px) scale(1.04);
+                    box-shadow: 0 18px 50px rgba(0,0,0,0.38);
+                    filter: saturate(1.1);
+                }
+                .story-bubble img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    border-radius: 50%;
+                    border: 4px solid rgba(255,255,255,0.12);
+                }
+                .story-label {
+                    text-align: center;
+                    margin-top: 0.6rem;
+                    color: var(--text);
+                    font-weight: 600;
+                    letter-spacing: 0.01em;
+                }
+                .pill {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 0.35rem;
+                    padding: 0.4rem 0.75rem;
+                    border-radius: 999px;
+                    background: rgba(255,255,255,0.08);
+                    color: var(--muted);
+                    border: var(--glass-border);
+                    font-size: 0.9rem;
+                }
+                .ghost-btn {
+                    width: 52px;
+                    height: 52px;
+                    border-radius: 14px;
+                    border: var(--glass-border);
+                    background: var(--card);
+                    color: var(--text);
+                    box-shadow: var(--shadow-soft);
+                    display: grid;
+                    place-items: center;
+                    transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+                }
+                .ghost-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-strong); }
+                .theme-toggle__icon { font-size: 1rem; }
+                .story-viewer {
+                    position: fixed;
+                    inset: 0;
+                    background: rgba(6,8,14,0.78);
+                    backdrop-filter: blur(18px);
+                    opacity: 0;
+                    pointer-events: none;
+                    transition: opacity 180ms ease;
+                    z-index: 999;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 1.5rem;
+                }
+                .story-viewer.active {
+                    opacity: 1;
+                    pointer-events: auto;
+                }
+                .story-shell {
+                    width: min(1080px, 94vw);
+                    height: min(640px, 80vh);
+                    background: var(--card-light);
+                    border-radius: 24px;
+                    border: var(--glass-border);
+                    box-shadow: var(--shadow-strong);
+                    overflow: hidden;
+                    position: relative;
+                    display: grid;
+                    grid-template-columns: 1fr 0.45fr;
+                }
+                .story-main {
+                    position: relative;
+                    overflow: hidden;
+                    background: #0c1016;
+                }
+                .story-progress {
+                    position: absolute;
+                    top: 18px;
+                    left: 18px;
+                    right: 18px;
+                    display: grid;
+                    gap: 8px;
+                    grid-template-columns: repeat(var(--segments, 4), 1fr);
+                    z-index: 3;
+                }
+                .progress-bar {
+                    height: 6px;
+                    background: rgba(255,255,255,0.14);
+                    border-radius: 999px;
+                    overflow: hidden;
+                }
+                .progress-fill {
+                    height: 100%;
+                    width: 0%;
+                    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+                    border-radius: inherit;
+                    transition: width 180ms linear;
+                }
+                .slide-track {
+                    position: absolute;
+                    inset: 0;
+                    display: grid;
+                    grid-auto-flow: column;
+                    grid-auto-columns: 100%;
+                    transition: transform 400ms ease;
+                }
+                .story-slide {
+                    position: relative;
+                    padding: 110px 38px 38px;
+                    color: #f8fafc;
+                    background: linear-gradient(120deg, rgba(12,16,30,0.84), rgba(15,18,28,0.92)),
+                                var(--bg, radial-gradient(circle at 40% 40%, rgba(255,255,255,0.04), rgba(0,0,0,0.1)));
+                    background-size: cover;
+                    background-position: center;
+                    display: grid;
+                    align-content: end;
+                    overflow: hidden;
+                }
+                .story-slide::after {
+                    content: "";
+                    position: absolute;
+                    inset: 0;
+                    background: linear-gradient(180deg, rgba(3,4,8,0.05) 0%, rgba(3,4,8,0.45) 60%, rgba(3,4,8,0.7) 100%),
+                                radial-gradient(circle at 80% 20%, rgba(35,150,127,0.35), transparent 42%),
+                                radial-gradient(circle at 12% 12%, rgba(234,190,124,0.3), transparent 38%);
+                    z-index: 0;
+                }
+                .story-slide > * { position: relative; z-index: 1; }
+                .story-kicker {
+                    display: inline-flex;
+                    padding: 0.35rem 0.9rem;
+                    border-radius: 999px;
+                    background: rgba(255,255,255,0.12);
+                    font-size: 0.9rem;
+                    letter-spacing: 0.04em;
+                    text-transform: uppercase;
+                    margin-bottom: 0.6rem;
+                }
+                .story-title {
+                    font-size: clamp(1.9rem, 4vw, 2.4rem);
+                    margin-bottom: 0.6rem;
+                }
+                .story-body {
+                    color: rgba(255,255,255,0.88);
+                    line-height: 1.6;
+                    max-width: 640px;
+                }
+                .badge-row {
+                    display: flex;
+                    gap: 0.6rem;
+                    flex-wrap: wrap;
+                    margin-top: 1.1rem;
+                }
+                .badge {
+                    padding: 0.45rem 0.85rem;
+                    border-radius: 12px;
+                    background: rgba(255,255,255,0.1);
+                    border: 1px solid rgba(255,255,255,0.14);
+                    font-size: 0.95rem;
+                }
+                .impact-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(140px,1fr));
+                    gap: 0.75rem;
+                    margin-top: 1.1rem;
+                }
+                .impact-card {
+                    padding: 0.9rem;
+                    border-radius: 14px;
+                    background: rgba(255,255,255,0.08);
+                    border: 1px solid rgba(255,255,255,0.15);
+                    text-align: left;
+                }
+                .impact-value {
+                    font-size: 1.5rem;
+                    font-weight: 700;
+                    letter-spacing: -0.01em;
+                }
+                .impact-label { color: rgba(255,255,255,0.7); font-size: 0.95rem; }
+                .story-meta {
+                    position: relative;
+                    z-index: 2;
+                    align-self: start;
+                    padding: 28px;
+                    background: var(--card);
+                    border-left: var(--glass-border);
+                    display: grid;
+                    gap: 1rem;
+                }
+                .meta-head {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.75rem;
+                }
+                .meta-head img {
+                    width: 52px;
+                    height: 52px;
+                    border-radius: 14px;
+                    object-fit: cover;
+                    border: var(--glass-border);
+                }
+                .meta-title {
+                    font-size: 1.3rem;
+                    margin: 0;
+                    color: var(--text);
+                }
+                .meta-sub { color: var(--muted); }
+                .meta-tags {
+                    display: flex;
+                    gap: 0.5rem;
+                    flex-wrap: wrap;
+                }
+                .meta-card {
+                    padding: 0.85rem;
+                    background: rgba(255,255,255,0.06);
+                    border-radius: 14px;
+                    border: var(--glass-border);
+                }
+                .demo-btn {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 0.45rem;
+                    padding: 0.85rem 1.1rem;
+                    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+                    color: #0b1020;
+                    border-radius: 12px;
+                    font-weight: 700;
+                    border: none;
+                    cursor: pointer;
+                    transition: transform 150ms ease, box-shadow 150ms ease;
+                    box-shadow: 0 12px 30px rgba(124,93,255,0.28);
+                }
+                .demo-btn:hover { transform: translateY(-1px) scale(1.01); }
+                .close-viewer {
+                    position: absolute;
+                    top: 16px;
+                    right: 16px;
+                    z-index: 4;
+                    width: 44px;
+                    height: 44px;
+                    border-radius: 12px;
+                    border: var(--glass-border);
+                    background: rgba(12,16,30,0.6);
+                    color: #fff;
+                    display: grid;
+                    place-items: center;
+                    cursor: pointer;
+                }
+                .tap-zone {
+                    position: absolute;
+                    inset: 0;
+                    width: 50%;
+                    z-index: 2;
+                    pointer-events: none;
+                }
+                .tap-zone.left { left: 0; }
+                .tap-zone.right { right: 0; left: auto; }
+                @media (max-width: 980px) {
+                    .story-shell { grid-template-columns: 1fr; height: 78vh; }
+                    .story-meta { border-left: none; border-top: var(--glass-border); grid-template-columns: 1fr; }
+                    .story-track { justify-content: flex-start; flex-wrap: nowrap; }
+                }
+                @media (max-width: 640px) {
+                    .story-bubble { width: 96px; height: 96px; }
+                    .projects-headline { flex-direction: column; align-items: flex-start; }
+                    .projects-carousel { grid-template-columns: 1fr; }
+                    .ghost-btn { display: none; }
+                    .story-slide { padding: 100px 24px 32px; }
+                }
+            </style>
+
+            <section id="projects" class="s-projects target-section projects-stories">
+                <div class="section-inner">
+                    <div class="row">
+                        <div class="column lg-12" data-animate-block>
+                            <div class="projects-headline" data-animate-el>
+                                <span class="dot"></span>
+                                <div>
+                                    <h2 class="text-pretitle">Projects Completed</h2>
+                                    <p class="h1" style="margin:0;">Swipe through story-style case studies with live metrics.</p>
+                                    <div class="pill" style="margin-top:0.5rem;"><i class="fas fa-bolt"></i> Auto-advances every 3s · Tap or click to control</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
 
-                <div class="row">
-                    <div class="column lg-12">
-                        <div class="projects-grid">
-                            <div class="project-card" data-animate-el>
-                                <span class="project-year">2025</span>
-                                <h3 class="project-title">Netflix Documentary Series</h3>
-                                <p class="project-description">Served as cinematographer and color grading specialist on 6-episode documentary. Managed $2M+ production budget and led post-production team of 12 professionals.</p>
-                            </div>
-
-                            <div class="project-card" data-animate-el>
-                                <span class="project-year">2024</span>
-                                <h3 class="project-title">Fortune 500 Brand Campaign</h3>
-                                <p class="project-description">Directed comprehensive brand video campaign across 5 platforms. Achieved 50M+ impressions and 15% engagement rate. Won Gold Award for Commercial Excellence.</p>
-                            </div>
-
-                            <div class="project-card" data-animate-el>
-                                <span class="project-year">2024</span>
-                                <h3 class="project-title">Independent Film</h3>
-                                <p class="project-description">Full production oversight including directing, cinematography, and post-production. Film premiered at Sundance Film Festival and secured distribution deal.</p>
-                            </div>
-
-                            <div class="project-card" data-animate-el>
-                                <span class="project-year">2023</span>
-                                <h3 class="project-title">Music Video Collection</h3>
-                                <p class="project-description">Directed 12 music videos for various independent and established artists. Total combined views: 25M+. Featured on MTV and Music streaming platforms.</p>
-                            </div>
-
-                            <div class="project-card" data-animate-el>
-                                <span class="project-year">2023</span>
-                                <h3 class="project-title">Corporate Digital Platform</h3>
-                                <p class="project-description">Produced 50+ training and instructional videos for major tech corporation. Created motion graphics library and brand video standards guide.</p>
-                            </div>
-
-                            <div class="project-card" data-animate-el>
-                                <span class="project-year">2022</span>
-                                <h3 class="project-title">Real Estate Marketing Series</h3>
-                                <p class="project-description">Produced cinematic property showcase videos using drone, 4K, and 360-degree camera technology. Increased property engagement by 300%.</p>
+                    <div class="row">
+                        <div class="column lg-12">
+                            <div class="projects-carousel">
+                                <button class="ghost-btn" id="storyPrev" aria-label="Scroll left"><i class="fas fa-chevron-left"></i></button>
+                                <div class="story-track" id="storyTrack"></div>
+                                <button class="ghost-btn" id="storyNext" aria-label="Scroll right"><i class="fas fa-chevron-right"></i></button>
                             </div>
                         </div>
                     </div>
                 </div>
+            </section>
 
-            </section> <!-- end s-projects -->
+            <div class="story-viewer" id="storyViewer" aria-hidden="true">
+                <div class="story-shell">
+                    <button class="close-viewer" id="closeStory" aria-label="Close story"><i class="fas fa-times"></i></button>
+                    <div class="story-main">
+                        <div class="story-progress" id="storyProgress"></div>
+                        <div class="slide-track" id="slideTrack"></div>
+                        <div class="tap-zone left" id="tapLeft"></div>
+                        <div class="tap-zone right" id="tapRight"></div>
+                    </div>
+                    <div class="story-meta" id="storyMeta"></div>
+                </div>
+            </div>
 
 
             <!-- ### contact
             ================================================== -->
             <section id="contact" class="s-contact target-section">
 
-                <div class="row contact-top">
-                    <div class="column lg-12">
-                        <h2 class="text-pretitle">
-                            Get In Touch
-                        </h2>
+                <div class="contact-wrap">
+                    <div class="contact-hero">
+                        <div>
+                            <p class="text-pretitle">Get In Touch</p>
+                            <h2 class="h1">Let’s shape your next film, commercial, or music video.</h2>
+                            <p class="contact-sub">Share your idea, audience, and timeline. I respond with a tailored plan within 24 hours.</p>
+                            <div class="contact-actions">
+                                <a href="mailto:hello@zackytravis.com" class="btn btn--medium">Start a project</a>
+                                <a href="tel:+13105551234" class="btn btn--stroke btn--small">Call now</a>
+                            </div>
+                        </div>
+                        <div class="contact-cta">
+                            <p class="cta-kicker">Now Booking</p>
+                            <h3>Q3 · 2026 <span class="pill">Limited slots</span></h3>
+                            <ul>
+                                <li><i class="fas fa-check"></i> Commercial & brand films</li>
+                                <li><i class="fas fa-check"></i> Music videos & live sessions</li>
+                                <li><i class="fas fa-check"></i> Docs & series pilots</li>
+                            </ul>
+                        </div>
+                    </div>
 
-                        <p class="h1">
-                            Ready to bring your next film project to life?
-                            Let's collaborate on commercials, music videos, documentaries, or corporate content.
-                        </p>
+                    <div class="contact-grid">
+                        <div class="contact-card">
+                            <div class="card-icon"><i class="fas fa-envelope-open-text"></i></div>
+                            <div>
+                                <p class="card-label">Email</p>
+                                <a href="mailto:hello@zackytravis.com" class="card-link">hello@zackytravis.com</a>
+                            </div>
+                        </div>
+                        <div class="contact-card">
+                            <div class="card-icon"><i class="fas fa-phone-alt"></i></div>
+                            <div>
+                                <p class="card-label">Phone</p>
+                                <a href="tel:+255655783152" class="card-link">+255 655 783 152</a>
+                            </div>
+                        </div>
+                        <div class="contact-card social-card">
+                            <div class="card-icon"><i class="fas fa-share-alt"></i></div>
+                            <div>
+                                <p class="card-label">Social</p>
+                                <ul class="contact-social social-icons">
+                                    <li><a href="https://www.instagram.com/thegreatzacky/" target="_blank" rel="noopener noreferrer" title="Instagram"><i class="fab fa-instagram"></i></a></li>
+                                    <li><a href="https://www.threads.com/@thegreatzacky" target="_blank" rel="noopener noreferrer" title="Threads"><span class="icon-threads"></span></a></li>
+                                    <li><a href="https://twitter.com" target="_blank" rel="noopener noreferrer" title="X/Twitter"><i class="fab fa-x-twitter"></i></a></li>
+                                    <li><a href="https://www.tiktok.com/@thegreatzacky" target="_blank" rel="noopener noreferrer" title="TikTok"><i class="fab fa-tiktok"></i></a></li>
+                                    <li><a href="https://www.youtube.com/@thegreatzacky" target="_blank" rel="noopener noreferrer" title="YouTube"><i class="fab fa-youtube"></i></a></li>
+                                    <li><a href="https://wa.me/+255655783152" target="_blank" rel="noopener noreferrer" title="WhatsApp"><i class="fab fa-whatsapp"></i></a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="contact-card">
+                            <div class="card-icon"><i class="fas fa-map-marker-alt"></i></div>
+                            <div>
+                                <p class="card-label">Base</p>
+                                <p class="card-link">Los Angeles · Remote worldwide</p>
+                            </div>
+                        </div>
                     </div>
-                </div> <!-- end contact-top -->
-
-                <div class="row contact-bottom">
-                    <div class="column lg-3 md-5 tab-6 stack-on-550 contact-block">
-                        <h3 class="text-pretitle">Reach me at</h3>
-                        <p class="contact-links">
-                            <a href="mailto:hello@zackytravis.com" class="mailtoui">hello@zackytravis.com</a> <br>
-                            <a href="tel:+13105551234">+1 (310) 555-1234</a>
-                        </p>
-                    </div>
-                    <div class="column lg-5 md-7 tab-12 stack-on-550 contact-block">
-                        <h3 class="text-pretitle">Follow Me</h3>
-                        <ul class="contact-social social-icons">
-                            <li><a href="https://www.instagram.com/thegreatzacky/" target="_blank" rel="noopener noreferrer" title="Instagram"><i class="fab fa-instagram"></i></a></li>
-                            <li><a href="https://twitter.com" target="_blank" rel="noopener noreferrer" title="X/Twitter"><i class="fab fa-x-twitter"></i></a></li>
-                            <li><a href="https://www.tiktok.com/@thegreatzacky" target="_blank" rel="noopener noreferrer" title="TikTok"><i class="fab fa-tiktok"></i></a></li>
-                            <li><a href="https://www.facebook.com/thegreatzacky" target="_blank" rel="noopener noreferrer" title="Facebook"><i class="fab fa-facebook"></i></a></li>
-                            <li><a href="https://www.youtube.com/@thegreatzacky" target="_blank" rel="noopener noreferrer" title="YouTube"><i class="fab fa-youtube"></i></a></li>
-                            <li><a href="https://wa.me/13105551234" target="_blank" rel="noopener noreferrer" title="WhatsApp"><i class="fab fa-whatsapp"></i></a></li>
-                            <li><a href="tel:+13105551234" title="Call"><i class="fas fa-phone"></i></a></li>
-                        </ul>
-                    </div>
-                    <div class="column lg-4 md-12 contact-block">
-                        <a href="mailto:hello@zackytravis.com" class="mailtoui btn btn--medium u-fullwidth contact-btn">Let's Create.</a>
-                    </div>
-                </div> <!-- end contact-bottom -->
+                </div>
 
             </section> <!-- end contact -->
 
@@ -965,14 +1611,410 @@
 
     </div> <!-- end -s-pagewrap -->
 
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const projects = [
+                {
+                    title: "Neon Dreams",
+                    category: "Music Video",
+                    role: "Director · Post",
+                    year: "2025",
+                    location: "Los Angeles, USA",
+                    thumbnail: "images/photography.jpg",
+                    stack: ["RED Komodo 6K", "DaVinci Resolve", "Unreal Engine"],
+                    deliverables: ["Master + social crops", "LUT pack", "Motion toolkit"],
+                    slides: [
+                        {
+                            kicker: "Problem",
+                            title: "Condense a six-hour shoot into a 90s viral visual",
+                            body: "Client needed nightclub energy with crystal clarity across neon and smoke-heavy scenes while keeping turnaround inside 72 hours.",
+                            badges: ["72h deadline", "Low-light venues", "Multi-cam sync"],
+                            image: "images/photography.jpg"
+                        },
+                        {
+                            kicker: "Process",
+                            title: "Hybrid virtual production + practical neon rigs",
+                            body: "Pre-lit with Unreal previs, ran steadicam + dolly, live color LUT previews, and synced lighting cues with MIDI triggers.",
+                            badges: ["On-set LUT preview", "Spline camera paths", "Audio-reactive lights"],
+                            image: "images/portfolio/gallery/g-minimalismo.jpg"
+                        },
+                        {
+                            kicker: "Solution",
+                            title: "Delivery built for every surface",
+                            body: "Mastered 6K, downscaled to buttery 4K, built vertical remixes, and shipped an editable title kit for future drops.",
+                            badges: ["ProRes 4444 master", "Vertical + square", "Title kit"],
+                            image: "images/flowers.jpg",
+                            demo: "https://example.com/neon-live"
+                        },
+                        {
+                            kicker: "Impact",
+                            title: "Launch weekend performance",
+                            body: "Audience stuck around, ads pulled cheaper CPMs, and organic shares spiked.",
+                            image: "images/seanshow.jpg",
+                            impacts: [
+                                { label: "Views (30d)", value: 12, suffix: "M" },
+                                { label: "Avg watch", value: 72, suffix: "%" },
+                                { label: "Ad recall lift", value: 38, suffix: "%" },
+                                { label: "CTR uplift", value: 4.3, suffix: "x" }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    title: "Ultimate Performance",
+                    category: "Commercial",
+                    role: "Director · VFX",
+                    year: "2025",
+                    location: "Austin, USA",
+                    thumbnail: "images/bunju.jpg",
+                    stack: ["Sony FX9", "Houdini", "After Effects"],
+                    deliverables: ["Hero film", "Six cutdowns", "Key visuals"],
+                    slides: [
+                        {
+                            kicker: "Problem",
+                            title: "Show horsepower without a racetrack permit",
+                            body: "Brand wanted visceral speed in downtown Austin with zero street closures and strict safety limits.",
+                            badges: ["No closures", "Full safety compliance", "Night shoot"],
+                            image: "images/bunju.jpg"
+                        },
+                        {
+                            kicker: "Process",
+                            title: "Invisible rigs + simulated speed",
+                            body: "Mounted gyro rigs, captured clean plates, and composited motion-blur streaks in Houdini to exaggerate acceleration.",
+                            badges: ["Gyro rigs", "Houdini streaks", "HDRI car paint"],
+                            image: "images/portfolio/gallery/g-minimalismo.jpg"
+                        },
+                        {
+                            kicker: "Solution",
+                            title: "Cinematic edit with kinetic typography",
+                            body: "Cut to percussive SFX, layered kinetic type tied to RPM peaks, and balanced cold steel palette with amber highlights.",
+                            badges: ["Kinetic type", "Per-channel grain", "Dual-tone grade"],
+                            image: "images/mkapa.jpg",
+                            demo: "https://example.com/performance"
+                        },
+                        {
+                            kicker: "Impact",
+                            title: "Campaign efficiency",
+                            image: "images/seanshow.jpg",
+                            impacts: [
+                                { label: "Cost vs. track shoot", value: 41, suffix: "% saved" },
+                                { label: "Lift in test markets", value: 27, suffix: "%" },
+                                { label: "Social shares", value: 180, suffix: "K" },
+                                { label: "Shoot days", value: 2, suffix: " -> 1" }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    title: "Brand Evolution",
+                    category: "Corporate",
+                    role: "Creative Lead",
+                    year: "2024",
+                    location: "New York, USA",
+                    thumbnail: "images/flowers.jpg",
+                    stack: ["Arri Alexa Mini", "Premiere", "Figma"],
+                    deliverables: ["Narrative film", "Pitch deck motion", "Stills"],
+                    slides: [
+                        {
+                            kicker: "Problem",
+                            title: "Humanize a B2B rebrand without losing authority",
+                            body: "Executive team wanted warmth while retaining enterprise credibility for investor day.",
+                            badges: ["Exec alignment", "Investor-ready", "Tight NDA"],
+                            image: "images/flowers.jpg"
+                        },
+                        {
+                            kicker: "Process",
+                            title: "One storyline, four personas",
+                            body: "Scripted four arcs, shot docu-style with prime lenses, and mirrored design system motion in lower-thirds.",
+                            badges: ["Docu blocking", "Cohesive motion system", "Voice-of-customer"],
+                            image: "images/portfolio/gallery/g-workshop.jpg"
+                        },
+                        {
+                            kicker: "Solution",
+                            title: "Design + film in lockstep",
+                            body: "Color pipeline matched Figma tokens; exports mirrored slide palette for zero-friction drop-in.",
+                            badges: ["Token-aligned grade", "Seamless deck handoff"],
+                            image: "images/portfolio/gallery/g-minimalismo.jpg",
+                            demo: "https://example.com/evolution"
+                        },
+                        {
+                            kicker: "Impact",
+                            title: "Board presentation wins",
+                            image: "images/selfie.jpg",
+                            impacts: [
+                                { label: "Investor approval", value: 9.4, suffix: "/10" },
+                                { label: "Time saved", value: 36, suffix: "hrs" },
+                                { label: "Internal NPS", value: 71, suffix: "" }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    title: "Heritage Documentary",
+                    category: "Documentary",
+                    role: "Director · Color",
+                    year: "2024",
+                    location: "Dar es Salaam, TZ",
+                    thumbnail: "images/mkapa.jpg",
+                    stack: ["BMPCC 6K", "Resolve Color", "RX Audio"],
+                    deliverables: ["Festival cut", "Educational edit", "Stills"],
+                    slides: [
+                        {
+                            kicker: "Problem",
+                            title: "Archive fragile stories before they vanish",
+                            body: "Elders only available for one weekend; audio environment was unforgiving with crowds + surf.",
+                            badges: ["One-weekend window", "Field audio repair", "Cultural guidance"],
+                            image: "images/mkapa.jpg"
+                        },
+                        {
+                            kicker: "Process",
+                            title: "Respect-first field production",
+                            body: "Worked with local historians, recorded dual-system audio, and built LUTs from woven textiles for palette authenticity.",
+                            badges: ["Dual-system audio", "Textile-inspired LUTs", "Historian review"],
+                            image: "images/portfolio/gallery/g-minimalismo.jpg"
+                        },
+                        {
+                            kicker: "Solution",
+                            title: "Emotion-led pacing",
+                            body: "Layered ambient soundbeds, kept subtitles minimal, and used gentle push-ins to preserve intimacy.",
+                            badges: ["Ambient beds", "Subtle captions"],
+                            image: "images/portfolio/gallery/g-workshop.jpg",
+                            demo: "https://example.com/heritage"
+                        },
+                        {
+                            kicker: "Impact",
+                            title: "Cultural + festival run",
+                            image: "images/flowers.jpg",
+                            impacts: [
+                                { label: "Festival selections", value: 7, suffix: "" },
+                                { label: "Community screenings", value: 18, suffix: "" },
+                                { label: "Archive hours saved", value: 54, suffix: "" }
+                            ]
+                        }
+                    ]
+                }
+            ];
+
+            const track = document.getElementById("storyTrack");
+            const progressWrap = document.getElementById("storyProgress");
+            const slideTrack = document.getElementById("slideTrack");
+            const viewer = document.getElementById("storyViewer");
+            const meta = document.getElementById("storyMeta");
+            const closeBtn = document.getElementById("closeStory");
+            const storyMain = document.querySelector(".story-main");
+            const scrollPrev = document.getElementById("storyPrev");
+            const scrollNext = document.getElementById("storyNext");
+
+            let currentProject = 0;
+            let currentSlide = 0;
+            let timer;
+
+            function renderThumbnails() {
+                track.innerHTML = projects.map((p, idx) => `
+                    <div style="text-align:center; width:128px; flex-shrink:0;">
+                        <div class="story-bubble" data-index="${idx}" title="${p.title}">
+                            <img src="${p.thumbnail}" alt="${p.title}">
+                        </div>
+                        <div class="story-label">${p.title}</div>
+                    </div>
+                `).join("");
+                track.querySelectorAll(".story-bubble").forEach(bubble => {
+                    bubble.addEventListener("click", () => openProject(parseInt(bubble.dataset.index, 10)));
+                });
+            }
+
+            function renderMeta(project) {
+                meta.innerHTML = `
+                    <div class="meta-head">
+                        <img src="${project.thumbnail}" alt="${project.title}">
+                        <div>
+                            <p class="meta-sub">${project.category}</p>
+                            <h3 class="meta-title">${project.title}</h3>
+                            <p class="meta-sub">${project.role}</p>
+                        </div>
+                    </div>
+                    <div class="meta-tags">
+                        <span class="pill"><i class="fas fa-map-marker-alt"></i> ${project.location}</span>
+                        <span class="pill"><i class="fas fa-calendar"></i> ${project.year}</span>
+                    </div>
+                    <div class="meta-card">
+                        <strong style="color:var(--text);">Stack</strong>
+                        <p class="meta-sub" style="margin:0.25rem 0 0;">${project.stack.join(" · ")}</p>
+                    </div>
+                    <div class="meta-card">
+                        <strong style="color:var(--text);">Deliverables</strong>
+                        <p class="meta-sub" style="margin:0.25rem 0 0;">${project.deliverables.join(" · ")}</p>
+                    </div>
+                `;
+            }
+
+                function renderSlides(project) {
+                slideTrack.innerHTML = project.slides.map((slide) => {
+                    const bg = slide.image || project.thumbnail;
+                    const badges = slide.badges ? `<div class="badge-row">${slide.badges.map(b => `<span class="badge">${b}</span>`).join("")}</div>` : "";
+                    const impacts = slide.impacts ? `
+                        <div class="impact-grid">
+                            ${slide.impacts.map(i => `
+                                <div class="impact-card" data-target="${i.value}" data-suffix="${i.suffix || ""}">
+                                    <div class="impact-value">0${i.suffix || ""}</div>
+                                    <div class="impact-label">${i.label}</div>
+                                </div>
+                            `).join("")}
+                        </div>` : "";
+                    const demo = slide.demo ? `<button class="demo-btn" data-demo="${slide.demo}"><i class="fas fa-external-link-alt"></i> Live Demo</button>` : "";
+                    return `
+                        <article class="story-slide" style="--bg: url('${bg}')">
+                            <span class="story-kicker">${slide.kicker}</span>
+                            <h3 class="story-title">${slide.title}</h3>
+                            <p class="story-body">${slide.body || ""}</p>
+                            ${badges}
+                            ${impacts}
+                            ${demo}
+                        </article>
+                    `;
+                }).join("");
+                slideTrack.style.transform = "translateX(0%)";
+            }
+
+            function renderProgress(project) {
+                const segments = project.slides.length;
+                progressWrap.style.setProperty("--segments", segments);
+                progressWrap.innerHTML = project.slides.map(() => `
+                    <div class="progress-bar"><div class="progress-fill"></div></div>
+                `).join("");
+            }
+
+            function animateCounters(slideIndex) {
+                const slide = slideTrack.children[slideIndex];
+                if (!slide) return;
+                slide.querySelectorAll(".impact-card").forEach(card => {
+                    const target = parseFloat(card.dataset.target);
+                    const suffix = card.dataset.suffix || "";
+                    const valueEl = card.querySelector(".impact-value");
+                    const duration = 1200;
+                    const start = performance.now();
+                    function tick(now) {
+                        const progress = Math.min((now - start) / duration, 1);
+                        const val = Math.round(target * progress * 100) / 100;
+                        valueEl.textContent = `${val.toLocaleString(undefined, { maximumFractionDigits: 2 })}${suffix}`;
+                        if (progress < 1) requestAnimationFrame(tick);
+                    }
+                    requestAnimationFrame(tick);
+                });
+            }
+
+            function setSlide(index, project) {
+                currentSlide = index;
+                slideTrack.style.transform = `translateX(-${index * 100}%)`;
+                const fills = progressWrap.querySelectorAll(".progress-fill");
+                fills.forEach((fill, idx) => {
+                    fill.style.transition = "none";
+                    fill.style.width = idx < index ? "100%" : "0%";
+                });
+                const currentFill = fills[index];
+                if (currentFill) {
+                    requestAnimationFrame(() => {
+                        currentFill.style.transition = "width 3000ms linear";
+                        currentFill.style.width = "100%";
+                    });
+                }
+                animateCounters(index);
+                resetTimer(project);
+            }
+
+            function nextSlide() {
+                const project = projects[currentProject];
+                const next = currentSlide + 1 >= project.slides.length ? 0 : currentSlide + 1;
+                setSlide(next, project);
+            }
+
+            function prevSlide() {
+                const project = projects[currentProject];
+                const prev = currentSlide - 1 < 0 ? project.slides.length - 1 : currentSlide - 1;
+                setSlide(prev, project);
+            }
+
+            function resetTimer(project) {
+                clearTimeout(timer);
+                timer = setTimeout(() => nextSlide(project), 3000);
+            }
+
+            function openProject(index) {
+                currentProject = index;
+                const project = projects[index];
+                renderMeta(project);
+                renderSlides(project);
+                renderProgress(project);
+                viewer.classList.add("active");
+                viewer.setAttribute("aria-hidden", "false");
+                document.body.style.overflow = "hidden";
+                setSlide(0, project);
+            }
+
+            function closeViewer() {
+                viewer.classList.remove("active");
+                viewer.setAttribute("aria-hidden", "true");
+                document.body.style.overflow = "";
+                clearTimeout(timer);
+            }
+
+            closeBtn.addEventListener("click", closeViewer);
+            storyMain.addEventListener("click", (e) => {
+                if (e.target.closest(".demo-btn")) return;
+                const rect = storyMain.getBoundingClientRect();
+                const mid = rect.left + rect.width / 2;
+                if (e.clientX < mid) prevSlide();
+                else nextSlide();
+            });
+
+            document.addEventListener("keydown", (e) => {
+                if (!viewer.classList.contains("active")) return;
+                if (e.key === "ArrowRight") nextSlide();
+                if (e.key === "ArrowLeft") prevSlide();
+                if (e.key === "Escape") closeViewer();
+            });
+
+            scrollPrev.addEventListener("click", () => track.scrollBy({ left: -240, behavior: "smooth" }));
+            scrollNext.addEventListener("click", () => track.scrollBy({ left: 240, behavior: "smooth" }));
+
+            slideTrack.addEventListener("click", (e) => {
+                const btn = e.target.closest(".demo-btn");
+                if (btn) window.open(btn.dataset.demo, "_blank");
+            });
+
+            renderThumbnails();
+        });
+    </script>
+
 
     <!-- Java Script
     ================================================== -->
+    <!-- Leaflet JS for Interactive Maps -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-markercluster/1.5.0/leaflet.markercluster.min.js"></script>
+    
     <script src="js/plugins.js"></script>
     <script src="js/main.js"></script>
                         <script>
 document.getElementById("year").textContent = new Date().getFullYear();
 </script>
+    <script>
+        // Typewriter preloader
+        document.addEventListener("DOMContentLoaded", () => {
+            const target = document.getElementById("typeText");
+            const preloader = document.getElementById("preloader");
+            const text = "ZACKY TRAVIS";
+            const letters = text.split("");
+            letters.forEach((ch, idx) => {
+                const span = document.createElement("span");
+                span.textContent = ch;
+                span.style.animationDelay = `${idx * 70}ms`;
+                target.appendChild(span);
+            });
+            const total = letters.length * 70 + 320;
+            setTimeout(() => preloader.classList.add("hidden"), total + 300);
+        });
+    </script>
 
     <!-- Theme Toggle Script -->
     <script>
