@@ -1,74 +1,118 @@
-/* ===================================================================
- * Luther 1.0.0 - Main JS
- *
- * ------------------------------------------------------------------- */
+/* =================================================================== 
+ * Premium Landing Page - JavaScript
+ * Smooth animations, interactions, and visual enhancements
+ * ===================================================================*/
 
-(function(html) {
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    initializeAnimations();
+    initializeScrollNavigation();
+    initializeSmoothScroll();
+});
 
-    "use strict";
+// Smooth scroll to sections
+function initializeSmoothScroll() {
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            const href = this.getAttribute('href');
+            if (href !== '#' && href.startsWith('#')) {
+                e.preventDefault();
+                const target = document.querySelector(href);
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            }
+        });
+    });
+}
 
-    html.className = html.className.replace(/\bno-js\b/g, '') + ' js ';
+// Navigation highlight on scroll
+function initializeScrollNavigation() {
+    const navLinks = document.querySelectorAll('.nav-menu a');
+    
+    window.addEventListener('scroll', function() {
+        const scrollPosition = window.scrollY;
+        
+        navLinks.forEach(link => {
+            const href = link.getAttribute('href');
+            if (href && href.startsWith('#')) {
+                const target = document.querySelector(href);
+                if (target) {
+                    const targetPosition = target.offsetTop - 100;
+                    const targetHeight = target.offsetHeight;
+                    
+                    if (scrollPosition >= targetPosition && scrollPosition < targetPosition + targetHeight) {
+                        navLinks.forEach(l => l.classList.remove('active'));
+                        link.classList.add('active');
+                    }
+                }
+            }
+        });
+    });
+}
 
+// Intersection Observer for fade-in animations
+function initializeAnimations() {
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -100px 0px'
+    };
 
+    const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+                observer.unobserve(entry.target);
+            }
+        });
+    }, observerOptions);
 
-   /* Animations
-    * -------------------------------------------------- */
-    const tl = anime.timeline( {
-        easing: 'easeInOutCubic',
-        duration: 800,
-        autoplay: false
-    })
-    .add({
-        targets: '#loader',
-        opacity: 0,
-        duration: 1000,
-        begin: function(anim) {
-            window.scrollTo(0, 0);
-        }
-    })
-    .add({
-        targets: '#preloader',
-        opacity: 0,
-        complete: function(anim) {
-            document.querySelector("#preloader").style.visibility = "hidden";
-            document.querySelector("#preloader").style.display = "none";
-        }
-    })
-    .add({
-        targets: '.s-header',
-        translateY: [-100, 0],
-        opacity: [0, 1]
-    }, '-=200')
-    .add({
-        targets: [ '.s-intro .text-pretitle', '.s-intro .text-huge-title'],
-        translateX: [100, 0],
-        opacity: [0, 1],
-        delay: anime.stagger(400)
-    })
-    .add({
-        targets: '.circles span',
-        keyframes: [
-            {opacity: [0, .3]},
-            {opacity: [.3, .1], delay: anime.stagger(100, {direction: 'reverse'})}
-        ],
-        delay: anime.stagger(100, {direction: 'reverse'})
-    })
-    .add({
-        targets: '.intro-social li',
-        translateX: [-50, 0],
-        opacity: [0, 1],
-        delay: anime.stagger(100, {direction: 'reverse'})
-    })
-    .add({
-        targets: '.intro-scrolldown',
-        translateY: [100, 0],
-        opacity: [0, 1]
-    }, '-=800');
+    // Observe all sections and cards
+    document.querySelectorAll('.trust-card, .work-card, .process-card, .about-card').forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(20px)';
+        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observer.observe(el);
+    });
+}
 
+// Add active state to nav links
+const style = document.createElement('style');
+style.textContent = `
+    .nav-menu a.active {
+        color: var(--color-accent);
+        border-bottom: 2px solid var(--color-accent);
+    }
+`;
+document.head.appendChild(style);
 
+// Parallax effect for hero section
+window.addEventListener('scroll', function() {
+    const hero = document.querySelector('.hero-visual');
+    if (hero) {
+        const scrolled = window.pageYOffset;
+        hero.style.transform = `translateY(${scrolled * 0.5}px)`;
+    }
+});
 
-   /* Preloader
-    * -------------------------------------------------- */
+// Mouse follow effect for gradient orbs
+document.addEventListener('mousemove', function(e) {
+    const orbs = document.querySelectorAll('.gradient-orb');
+    const x = e.clientX / window.innerWidth;
+    const y = e.clientY / window.innerHeight;
+    
+    orbs.forEach((orb, index) => {
+        const offset = (index + 1) * 10;
+        orb.style.transform = `translate(${x * offset}px, ${y * offset}px)`;
+    });
+});
+
+// Log initialization
+console.log('%cPremium Landing Page Initialized', 'color: #ffd700; font-size: 14px; font-weight: bold');
     const ssPreloader = function() {
 
         const preloader = document.querySelector('#preloader');
