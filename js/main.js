@@ -355,6 +355,18 @@
     }; // end ssMoveTo
 
 
+   /* Footer year
+    * ------------------------------------------------------ */
+    const ssFooterYear = function() {
+
+        const yearNode = document.querySelector('#footer-year');
+        if (!yearNode) return;
+
+        yearNode.textContent = new Date().getFullYear();
+
+    }; // end ssFooterYear
+
+
    /* Initialize
     * ------------------------------------------------------ */
     (function ssInit() {
@@ -367,6 +379,7 @@
         ssLightbox();
         ssAlertBoxes();
         ssMoveTo();
+        ssFooterYear();
 
     })();
 
