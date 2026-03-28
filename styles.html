@@ -5,7 +5,7 @@
     <!--- basic page needs
     ================================================== -->
     <meta charset="utf-8">
-    <title>Zacky Travis - Styles</title>
+    <title>Luther - Styles</title>
     <meta name="description" content="">
     <meta name="author" content="">
 
@@ -67,20 +67,14 @@
         <header class="s-header">
 
             <div class="header-mobile">
-                <span class="mobile-home-link"><a href="index.html">Zacky.</a></span>
+                <span class="mobile-home-link"><a href="index.html">Luther.</a></span>
                 <a class="mobile-menu-toggle" href="#0"><span>Menu</span></a>
             </div>
-
-            <!-- Theme Toggle Button -->
-            <button class="theme-toggle dark" id="themeToggle" aria-label="Toggle dark/light mode">
-                <span class="theme-toggle__icon" title="Light mode">☀️</span>
-                <span class="theme-toggle__icon" title="Dark mode">🌙</span>
-            </button>
 
             <div class="row wide main-nav-wrap">
                 <nav class="column lg-12 main-nav">
                     <ul>
-                        <li><a href="index.html" class="home-link">Zacky.</a></li>
+                        <li><a href="index.html" class="home-link">Luther.</a></li>
                         <li class="current"><a href="index.html">Intro</a></li>
                         <li><a href="index.html">About</a></li>
                         <li><a href="index.html">Works</a></li>
@@ -801,55 +795,6 @@
     ================================================== -->
     <script src="js/plugins.js"></script>
     <script src="js/main.js"></script>
-
-    <!-- Theme Toggle Script -->
-    <script>
-        // Initialize theme from localStorage or system preference
-        function initializeTheme() {
-            const savedTheme = localStorage.getItem('theme') || 'dark';
-            const toggle = document.getElementById('themeToggle');
-            
-            document.documentElement.setAttribute('data-theme', savedTheme);
-            toggle.classList.remove('light', 'dark');
-            toggle.classList.add(savedTheme);
-        }
-
-        // Toggle theme function
-        function toggleTheme() {
-            const htmlElement = document.documentElement;
-            const currentTheme = htmlElement.getAttribute('data-theme') || 'dark';
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            const toggle = document.getElementById('themeToggle');
-            
-            htmlElement.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            
-            toggle.classList.remove('light', 'dark');
-            toggle.classList.add(newTheme);
-        }
-
-        // Attach event listener to theme toggle button
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeTheme();
-            const themeToggle = document.getElementById('themeToggle');
-            if (themeToggle) {
-                themeToggle.addEventListener('click', toggleTheme);
-            }
-        });
-
-        // Handle system theme preference changes
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
-            const newTheme = e.matches ? 'dark' : 'light';
-            if (!localStorage.getItem('theme')) {
-                document.documentElement.setAttribute('data-theme', newTheme);
-                const toggle = document.getElementById('themeToggle');
-                if (toggle) {
-                    toggle.classList.remove('light', 'dark');
-                    toggle.classList.add(newTheme);
-                }
-            }
-        });
-    </script>
 
 </body>
 </html>
