@@ -40,10 +40,10 @@
         opacity: [0, 1]
     }, '-=200')
     .add({
-        targets: [ '.s-intro .text-pretitle', '.s-intro .text-huge-title'],
+        targets: [ '.s-intro .text-pretitle', '.s-intro .intro-caption', '.s-intro .intro-summary', '.s-intro .intro-actions', '.s-intro .intro-notes', '.s-intro .intro-showcase' ],
         translateX: [100, 0],
         opacity: [0, 1],
-        delay: anime.stagger(400)
+        delay: anime.stagger(180)
     })
     .add({
         targets: '.circles span',
