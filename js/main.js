@@ -367,6 +367,43 @@
     }; // end ssFooterYear
 
 
+   /* Intro glow follow
+    * ------------------------------------------------------ */
+    const ssIntroGlow = function() {
+
+        const intro = document.querySelector('.s-intro');
+        const glow = document.querySelector('[data-intro-glow]');
+        if (!(intro && glow)) return;
+
+        let currentX = window.innerWidth * 0.5;
+        let currentY = window.innerHeight * 0.35;
+        let targetX = currentX;
+        let targetY = currentY;
+
+        const render = function() {
+            currentX += (targetX - currentX) * 0.08;
+            currentY += (targetY - currentY) * 0.08;
+            glow.style.left = currentX + 'px';
+            glow.style.top = currentY + 'px';
+            window.requestAnimationFrame(render);
+        };
+
+        intro.addEventListener('pointermove', function(event) {
+            const bounds = intro.getBoundingClientRect();
+            targetX = event.clientX - bounds.left;
+            targetY = event.clientY - bounds.top;
+        });
+
+        intro.addEventListener('pointerleave', function() {
+            targetX = intro.offsetWidth * 0.5;
+            targetY = intro.offsetHeight * 0.35;
+        });
+
+        render();
+
+    }; // end ssIntroGlow
+
+
    /* Initialize
     * ------------------------------------------------------ */
     (function ssInit() {
@@ -380,6 +417,7 @@
         ssAlertBoxes();
         ssMoveTo();
         ssFooterYear();
+        ssIntroGlow();
 
     })();
 
