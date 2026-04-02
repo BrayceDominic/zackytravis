@@ -2035,6 +2035,12 @@ input[type="button"] {
     border                  : 1px solid var(--color-btn);
     -webkit-font-smoothing  : antialiased;
     -moz-osx-font-smoothing : grayscale;
+    -webkit-appearance      : none;
+    -moz-appearance         : none;
+    appearance              : none;
+    forced-color-adjust     : none;
+    -webkit-text-fill-color : currentColor;
+    color-scheme            : dark;
 }
 
 .btn:focus,
@@ -2060,9 +2066,11 @@ button.btn--primary,
 input[type="submit"].btn--primary,
 input[type="reset"].btn--primary,
 input[type="button"].btn--primary {
-    background   : var(--color-btn-primary);
-    border-color : var(--color-btn-primary);
-    color        : var(--color-btn-primary-text);
+    background-color : var(--color-btn-primary) !important;
+    background-image : none !important;
+    border-color     : var(--color-btn-primary) !important;
+    color            : var(--color-btn-primary-text) !important;
+    -webkit-text-fill-color : var(--color-btn-primary-text);
 }
 
 .btn.btn--primary:focus,
@@ -2075,9 +2083,11 @@ button.btn--primary:hover,
 input[type="submit"].btn--primary:hover,
 input[type="reset"].btn--primary:hover,
 input[type="button"].btn--primary:hover {
-    background   : var(--color-btn-primary-hover);
-    border-color : var(--color-btn-primary-hover);
-    color        : var(--color-btn-primary-hover-text);
+    background-color : var(--color-btn-primary-hover) !important;
+    background-image : none !important;
+    border-color     : var(--color-btn-primary-hover) !important;
+    color            : var(--color-btn-primary-hover-text) !important;
+    -webkit-text-fill-color : var(--color-btn-primary-hover-text);
 }
 
 /* button modifiers
@@ -2106,8 +2116,10 @@ button.btn--large {
 .btn--stroke,
 button.btn--stroke {
     background : transparent !important;
-    border     : 1px solid var(--color-btn-stroke);
-    color      : var(--color-btn-stroke-text);
+    background-image : none !important;
+    border     : 1px solid var(--color-btn-stroke) !important;
+    color      : var(--color-btn-stroke-text) !important;
+    -webkit-text-fill-color : var(--color-btn-stroke-text);
 }
 
 .btn--stroke:focus,
@@ -2115,8 +2127,10 @@ button.btn--stroke:focus,
 .btn--stroke:hover,
 button.btn--stroke:hover {
     background : var(--color-btn-stroke-hover) !important;
-    border     : 1px solid var(--color-btn-stroke-hover);
-    color      : var(--color-btn-stroke-hover-text);
+    background-image : none !important;
+    border     : 1px solid var(--color-btn-stroke-hover) !important;
+    color      : var(--color-btn-stroke-hover-text) !important;
+    -webkit-text-fill-color : var(--color-btn-stroke-hover-text);
 }
 
 .btn--pill,
